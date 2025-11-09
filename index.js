@@ -33,8 +33,28 @@ async function run() {
     const usersCollection = client
       .db("FreeLanceMarketPlace")
       .collection("Users");
+     
+     
+    //Jobs Apis
+    app.get("/jobs", async (req, res) => {
+      const result = await jobsCollection.find().toArray();
+      res.send(result);
+    });
 
-    //user apis
+    app.get("/latest_jobs", async (req, res) => {
+      const result = await jobsCollection.find().sort({ postedAt: -1 }).limit(6).toArray();
+      res.send(result);
+    });
+
+    app.post("/jobs", async (req, res) => {
+      const newJob = req.body;
+      newJob.postedAt = new Date().toISOString();
+
+      const result = await jobsCollection.insertOne(newJob);
+      res.send(result);
+    });
+
+    //User Apis
     app.get("/users", async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
