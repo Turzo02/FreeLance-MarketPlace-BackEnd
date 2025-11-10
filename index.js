@@ -40,11 +40,13 @@ async function run() {
     });
 
     // single job api
-    app.get("/jobDetails/:id", async (req, res) => {
+    app.get("/jobs/:id", async (req, res) => {
       const id = req.params.id;
 
       //jahmela korar laglo 😓
-      const query = ObjectId.isValid(id) ? { _id: new ObjectId(id) } : { _id: id };
+      const query = ObjectId.isValid(id)
+        ? { _id: new ObjectId(id) }
+        : { _id: id };
       const result = await jobsCollection.findOne(query);
       res.send(result);
     });
@@ -65,6 +67,42 @@ async function run() {
       newJob.postedAt = new Date().toISOString();
       const result = await jobsCollection.insertOne(newJob);
       res.send(result);
+    });
+
+    //accepted job by user api
+
+    app.patch("/jobs/:id", async (req, res) => {
+      const jobId = req.params.id;
+      const { acceptedUserMail } = req.body;
+
+      const query = ObjectId.isValid(jobId)
+        ? { _id: new ObjectId(jobId) }
+        : { _id: jobId };
+      const result = await jobsCollection.updateOne(query, {
+        $addToSet: { acceptedUserMail: acceptedUserMail },
+      });
+    });
+
+    // jobs that are accepted by a specific user api
+    app.get("/myacceptedtasks/:email", async (req, res) => {
+      const userEmail = req.params.email;
+      const result = await jobsCollection
+        .find({ acceptedUserMail: userEmail })
+        .toArray();
+
+      res.send(result);
+    });
+    //remove accepted user email from useraccepted api
+    app.patch("/jobs/:id/cancel", async (req, res) => {
+      const jobId = req.params.id;
+      const { userEmail } = req.body; 
+      const query = ObjectId.isValid(jobId)
+        ? { _id: new ObjectId(jobId) }
+        : { _id: jobId };
+
+      const result = await jobsCollection.updateOne(query, {
+        $pull: { acceptedUserMail: userEmail },
+      });
     });
 
     //User Apis
