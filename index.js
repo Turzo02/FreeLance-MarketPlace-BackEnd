@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 5000;
 const cors = require("cors");
+require("dotenv").config();
 const { MongoClient, ServerApiVersion } = require("mongodb");
 
 app.use(cors());
@@ -11,11 +12,8 @@ app.get("/", (req, res) => {
   res.send("Hello World! Server is running!");
 });
 
-//FreeLanceMarketPlace
-//lDEfPkqLCKUvJSDO
-
 const uri =
-  "mongodb+srv://FreeLanceMarketPlace:lDEfPkqLCKUvJSDO@smartproduct.gqn7fwo.mongodb.net/?appName=SmartProducT";
+  `mongodb+srv://${process.env.FM_USER}:${process.env.FM_PASS}@smartproduct.gqn7fwo.mongodb.net/?appName=SmartProducT`;
 
 const client = new MongoClient(uri, {
   serverApi: {
