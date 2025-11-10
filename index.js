@@ -38,7 +38,7 @@ async function run() {
       const result = await jobsCollection.find().toArray();
       res.send(result);
     });
-
+    
     // single job api
     app.get("/jobs/:id", async (req, res) => {
       const id = req.params.id;
@@ -50,6 +50,39 @@ async function run() {
       const result = await jobsCollection.findOne(query);
       res.send(result);
     });
+
+    //jobs by email api🌟🌟
+    app.get("/jobs/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { userEmail: email };
+      const result = await jobsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    //delete a posted job by user api
+    app.delete("/jobs/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = ObjectId.isValid(id)
+        ? { _id: new ObjectId(id) }
+        : { _id: id };
+      const result = await jobsCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    //update a posted job by user api
+    app.patch("/jobs/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedJob = req.body;
+      const query = ObjectId.isValid(id)
+        ? { _id: new ObjectId(id) }
+        : { _id: id };
+      const result = await jobsCollection.updateOne(query, {
+        $set: updatedJob,
+      });
+      res.send(result);
+    })
+
+
 
     // lastest jobs api
     app.get("/latest_jobs", async (req, res) => {
@@ -70,7 +103,6 @@ async function run() {
     });
 
     //accepted job by user api
-
     app.patch("/jobs/:id", async (req, res) => {
       const jobId = req.params.id;
       const { acceptedUserMail } = req.body;
@@ -104,6 +136,7 @@ async function run() {
         $pull: { acceptedUserMail: userEmail },
       });
     });
+
 
     //User Apis
     app.get("/users", async (req, res) => {
