@@ -3,7 +3,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 const cors = require("cors");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 app.use(cors());
 app.use(express.json());
@@ -12,8 +12,7 @@ app.get("/", (req, res) => {
   res.send("Hello World! Server is running!");
 });
 
-const uri =
-  `mongodb+srv://${process.env.FM_USER}:${process.env.FM_PASS}@smartproduct.gqn7fwo.mongodb.net/?appName=SmartProducT`;
+const uri = `mongodb+srv://${process.env.FM_USER}:${process.env.FM_PASS}@smartproduct.gqn7fwo.mongodb.net/?appName=SmartProducT`;
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -31,23 +30,39 @@ async function run() {
     const usersCollection = client
       .db("FreeLanceMarketPlace")
       .collection("Users");
-     
-     
+
     //Jobs Apis
+
+    //all jobs api
     app.get("/jobs", async (req, res) => {
       const result = await jobsCollection.find().toArray();
       res.send(result);
     });
 
-    app.get("/latest_jobs", async (req, res) => {
-      const result = await jobsCollection.find().sort({ postedAt: -1 }).limit(6).toArray();
+    // single job api
+    app.get("/jobDetails/:id", async (req, res) => {
+      const id = req.params.id;
+
+      //jahmela korar laglo 😓
+      const query = ObjectId.isValid(id) ? { _id: new ObjectId(id) } : { _id: id };
+      const result = await jobsCollection.findOne(query);
       res.send(result);
     });
 
+    // lastest jobs api
+    app.get("/latest_jobs", async (req, res) => {
+      const result = await jobsCollection
+        .find()
+        .sort({ postedAt: -1 })
+        .limit(6)
+        .toArray();
+      res.send(result);
+    });
+
+    //add job api
     app.post("/jobs", async (req, res) => {
       const newJob = req.body;
       newJob.postedAt = new Date().toISOString();
-
       const result = await jobsCollection.insertOne(newJob);
       res.send(result);
     });
