@@ -103,7 +103,7 @@ async function run() {
     });
 
     //accepted job by user api
-    app.patch("/jobs/:id", async (req, res) => {
+    app.patch("/acceptedjobs/:id", async (req, res) => {
       const jobId = req.params.id;
       const { acceptedUserMail } = req.body;
 
@@ -113,9 +113,10 @@ async function run() {
       const result = await jobsCollection.updateOne(query, {
         $addToSet: { acceptedUserMail: acceptedUserMail },
       });
+      res.send(result);
     });
 
-    // jobs that are accepted by a specific user api
+    // jobs that are accepted by a specific user api🚀
     app.get("/myacceptedtasks/:email", async (req, res) => {
       const userEmail = req.params.email;
       const result = await jobsCollection
@@ -135,6 +136,7 @@ async function run() {
       const result = await jobsCollection.updateOne(query, {
         $pull: { acceptedUserMail: userEmail },
       });
+      res.send(result);
     });
 
 
